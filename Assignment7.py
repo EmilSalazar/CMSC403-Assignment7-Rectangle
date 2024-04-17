@@ -1,6 +1,7 @@
+# Emil Baez Salazar
+
 import tkinter as tk
 import sys
-
 
 class CustomCanvas:
     def __init__(self, height, width):
@@ -31,25 +32,32 @@ class Rectangle:
 
 def pack(allRect, canvasSize):
     canvas_height, canvas_width = canvasSize
+    # Sort rectangles by area (largest to smallest) to potentially improve packing
+    allRect.sort(key=lambda r: r.height * r.width, reverse=True)
     placed_rectangles = []
+
     for rect in allRect:
         placed = False
-        for x in range(canvas_width):
+        for x in range(canvas_width - rect.width + 1):  # Ensure rectangle fits horizontally
             if placed:
                 break
-            for y in range(canvas_height):
-                if all(not (r.x < x + rect.width and r.x + r.width > x and r.y < y + rect.height and r.y + r.height > y)
-                       for r in placed_rectangles):
+            for y in range(canvas_height - rect.height + 1):  # Ensure rectangle fits vertically
+                # Check overlap with already placed rectangles
+                if all(not (r.x < x + rect.width and r.x + r.width > x and r.y < y + rect.height and r.y + r.height > y) for r in placed_rectangles):
                     rect.x, rect.y = x, y
                     placed_rectangles.append(rect)
                     placed = True
                     break
+        if not placed:
+            print(f"Warning: Could not place rectangle {rect} within canvas bounds.")
+
     return placed_rectangles
+
 
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python Assignment7.py <filepath>")
+        print("")
         return
 
     filepath = sys.argv[1]
